@@ -21,7 +21,10 @@ Route::get('/', function () {
 
 //Route::get('/category/create', ['\App\Http\Controllers\CategoryController::class', 'create']);
 //Route::get('/category/create', '\App\Http\Controllers\CategoryController@create');
-Route::resource('category', '\App\Http\Controllers\CategoryController');
+Route::resource('category', '\App\Http\Controllers\CategoryController')->middleware('auth');
+
+Route::resource('food', '\App\Http\Controllers\FoodController')->middleware('auth');
+//Route::post('/food/create', ['\App\Http\Controllers\FoodController::class', 'create']);
 
 
 
@@ -31,8 +34,6 @@ Route::resource('category', '\App\Http\Controllers\CategoryController');
 
 
 
-
-Auth::routes();
+Auth::routes(['register'=>false]);
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-

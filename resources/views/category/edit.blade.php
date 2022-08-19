@@ -21,6 +21,9 @@
                             <label for="name">Name</label>
                             <input type="text" name="name" class="form-control" value="{{ $category->name }}">
                         </div>
+                        @error('name')
+                        <div class="alert">{{ $message }}</div>
+                        @enderror
                         <div class="form-group mt-3">
                             <button class="btn btn-dark">Update</button>
                         </div>

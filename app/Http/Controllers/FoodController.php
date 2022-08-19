@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Food;
 
 class FoodController extends Controller
 {
@@ -13,7 +14,8 @@ class FoodController extends Controller
      */
     public function index()
     {
-        //
+        $foods = Food::latest()->paginate(1);
+        return view('food.index', compact('foods'));
     }
 
     /**
@@ -23,7 +25,7 @@ class FoodController extends Controller
      */
     public function create()
     {
-        //
+        return view('food.create');
     }
 
     /**
@@ -34,7 +36,27 @@ class FoodController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required',
+            'description' => 'required',
+            'price' => 'required|integer',
+            'category' => 'required',
+            'image' => 'required|image|mimes:png,jpg,jpeg'
+        ]);
+
+        $image = $request->file('image');
+        $name = time() . '.' . $image->getClientOriginalExtension();
+        $destionationPath = public_path('/image');
+        $image->move($destionationPath, $name);
+
+        Food::create([
+            'name' => $request->get('name'),
+            'description' => $request->get('description'),
+            'price' => $request->get('price'),
+            'category_id' => $request->get('category'),
+            'image' => $name
+        ]);
+        return redirect()->back()->with('message', 'Food has been successfull added');
     }
 
     /**
@@ -56,7 +78,8 @@ class FoodController extends Controller
      */
     public function edit($id)
     {
-        //
+        $food = Food::find($id);
+        return view('food.edit', compact('food'));
     }
 
     /**
@@ -68,7 +91,31 @@ class FoodController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required',
+            'description' => 'required',
+            'price' => 'required|integer',
+            'category' => 'required',
+            'image' => 'required|image|mimes:png,jpg,jpeg'
+        ]);
+
+        $food = Food::find($id);
+        $name = $food->image;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $name = time() . '.' . $image->getClientOriginalExtension();
+            $destionationPath = public_path('/image');
+            $image->move($destionationPath, $name);
+        }
+
+        $food->name = $request->get('name');
+        $food->description = $request->get('description');
+        $food->price = $request->get('price');
+        $food->category_id = $request->get('category');
+        $food->image = $name;
+        $food->save();
+
+        return redirect()->route('food.index')->with('message', 'Food Information Updated');
     }
 
     /**
@@ -79,6 +126,8 @@ class FoodController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $food = Food::find($id);
+        $food->delete();
+        return redirect()->route('food.index')->with('message', 'Food has been successfull deleted');
     }
 }
